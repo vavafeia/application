@@ -1,5 +1,6 @@
 import streamlit as st
 import openai
+import pandas as pd
 import yfinance as yf
 
 # Set OpenAI API Key from Streamlit Secrets
