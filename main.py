@@ -1,9 +1,9 @@
 import streamlit as st
-from openai import OpenAI
+import openai
 import yfinance as yf
 
-# Replace "your_api_key_here" with your actual OpenAI API key
-client = OpenAI(api_key="OPEN_API_KEY")
+# Set OpenAI API Key from Streamlit Secrets
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 st.title('Interactive Financial Stock Market Comparative Analysis Tool')
 
@@ -32,6 +32,7 @@ with col1:
         st.line_chart(stock_data['Close'])
     elif chart_type == 'Bar':
         st.bar_chart(stock_data['Close'])
+
 with col2:
     st.subheader(f"Displaying data for: {selected_stock2}")
     st.write(stock_data2)
@@ -41,12 +42,24 @@ with col2:
     elif chart_type2 == 'Line':
         st.line_chart(stock_data2['Close'])
 
+# Comparative Performance using OpenAI GPT
 if st.button('Comparative Performance'):
-  response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[
-            {"role": "system", "content": "You are a financial assistant that will retrieve two tables of financial market data and will summarize the comparative performance in text, in full detail with highlights for each stock and also a conclusion with a markdown output. BE VERY STRICT ON YOUR OUTPUT"},
-            {"role": "user", "content": f"This is the {selected_stock} stock data : {stock_data}, this is {selected_stock2} stock data: {stock_data2}"}
-          ]
+    # Prepare messages for GPT-3.5 Turbo
+    prompt = f"""
+    This is the {selected_stock} stock data : {stock_data.to_string(index=False)},
+    and this is {selected_stock2} stock data: {stock_data2.to_string(index=False)}.
+    Summarize the comparative performance of both stocks with highlights and a conclusion.
+    """
+
+    # OpenAI GPT-3.5 Turbo request
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a financial assistant."},
+            {"role": "user", "content": prompt}
+        ]
     )
-  st.write(response.choices[0].message.content)
+
+    # Display GPT response
+    st.markdown(response['choices'][0]['message']['content'])
+
