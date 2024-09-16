@@ -21,26 +21,30 @@ selected_stock2 = st.sidebar.text_input('Enter Stock Ticker 2', 'GOOGL').upper()
 stock_data = get_stock_data(selected_stock)
 stock_data2 = get_stock_data(selected_stock2)
 
-col1, col2 = st.columns(2)
+combined_data = pd.DataFrame({
+    f'{selected_stock} Close': stock_data['Close'],
+    f'{selected_stock2} Close': stock_data2['Close']
+})
+
+col1, col2, col3 = st.columns(3)
 
 # Display stock data
 with col1:
     st.subheader(f"Displaying data for: {selected_stock}")
     st.write(stock_data)
-    chart_type = st.sidebar.selectbox(f'Select Chart Type for {selected_stock}', ['Line', 'Bar'])
-    if chart_type == 'Line':
-        st.line_chart(stock_data['Close'])
-    elif chart_type == 'Bar':
-        st.bar_chart(stock_data['Close'])
+    
 
 with col2:
     st.subheader(f"Displaying data for: {selected_stock2}")
     st.write(stock_data2)
-    chart_type2 = st.sidebar.selectbox(f'Select Chart Type for {selected_stock2}', ['Line', 'Bar'])
+    
+with col3:
+    chart_type2 = st.sidebar.selectbox(f'Select Chart Type for {selected_stock} and {selected_stock2} combined', ['Line', 'Bar'])
     if chart_type2 == 'Bar':
-        st.bar_chart(stock_data2['Close'])
+        st.bar_chart(combined_data)
     elif chart_type2 == 'Line':
-        st.line_chart(stock_data2['Close'])
+        st.line_chart(combined_data)
+    
 
 # Comparative Performance using OpenAI GPT
 if st.button('Comparative Performance'):
